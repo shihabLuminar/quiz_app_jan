@@ -1,6 +1,6 @@
 import 'package:quiz_app_jan/model/quiz_screen_models/questions_model.dart';
 
-class HomeScreenController {
+class QuizScreenController {
   static List<QuestionsModel> flutterQuestions = [
     QuestionsModel(
       question: "What does Flutter use for layout?",

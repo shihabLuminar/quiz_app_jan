@@ -1,8 +1,9 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:quiz_app_jan/controller/home_screen_controller.dart';
+import 'package:quiz_app_jan/controller/quiz_screen_controller.dart';
 import 'package:quiz_app_jan/core/constants/color_constants.dart';
+import 'package:quiz_app_jan/view/result_screen/result_screen.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -14,6 +15,7 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> {
   int currentQstnIndex = 0;
   int? selectedAnswerIndex;
+  int rightAnswersCount = 0;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -32,7 +34,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     borderRadius: BorderRadius.circular(15),
                     color: ColorConstants.darkGrey),
                 child: Text(
-                  HomeScreenController
+                  QuizScreenController
                       .flutterQuestions[currentQstnIndex].question,
                   style: TextStyle(
                       color: ColorConstants.primaryWhite, fontSize: 18),
@@ -43,12 +45,20 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
               Column(
                 children: List.generate(
-                    HomeScreenController
+                    QuizScreenController
                         .flutterQuestions[currentQstnIndex].optionsList.length,
                     (index) => InkWell(
                           onTap: () {
                             if (selectedAnswerIndex == null) {
                               selectedAnswerIndex = index;
+
+                              if (selectedAnswerIndex ==
+                                  QuizScreenController
+                                      .flutterQuestions[currentQstnIndex]
+                                      .correctAnswerIndex) {
+                                rightAnswersCount++;
+                              }
+                              print(rightAnswersCount);
 
                               setState(() {});
                             }
@@ -60,22 +70,8 @@ class _QuizScreenState extends State<QuizScreen> {
                                   horizontal: 15, vertical: 10),
                               decoration: BoxDecoration(
                                   border: Border.all(
-                                      color: (index ==
-                                                  HomeScreenController
-                                                      .flutterQuestions[
-                                                          currentQstnIndex]
-                                                      .correctAnswerIndex &&
-                                              selectedAnswerIndex != null)
-                                          ? Colors.green
-                                          : selectedAnswerIndex == index
-                                              ? (selectedAnswerIndex ==
-                                                      HomeScreenController
-                                                          .flutterQuestions[
-                                                              currentQstnIndex]
-                                                          .correctAnswerIndex
-                                                  ? Colors.green
-                                                  : Colors.red)
-                                              : ColorConstants.primaryGrey),
+                                    color: buldColor(index),
+                                  ),
                                   borderRadius: BorderRadius.circular(10),
                                   color: Colors.transparent),
                               child: Row(
@@ -83,7 +79,7 @@ class _QuizScreenState extends State<QuizScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    HomeScreenController
+                                    QuizScreenController
                                         .flutterQuestions[currentQstnIndex]
                                         .optionsList[index],
                                     style: TextStyle(
@@ -91,8 +87,8 @@ class _QuizScreenState extends State<QuizScreen> {
                                         fontSize: 18),
                                   ),
                                   Icon(
-                                    Icons.close_rounded,
-                                    color: ColorConstants.primaryGreen,
+                                    buildIcons(index),
+                                    color: buldColor(index),
                                   )
                                 ],
                               ),
@@ -106,10 +102,18 @@ class _QuizScreenState extends State<QuizScreen> {
               InkWell(
                 onTap: () {
                   if (currentQstnIndex <
-                      HomeScreenController.flutterQuestions.length - 1) {
+                      QuizScreenController.flutterQuestions.length - 1) {
                     currentQstnIndex++;
                     selectedAnswerIndex = null;
                     setState(() {});
+                  } else {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ResultScreen(
+                            righAnswerCount: rightAnswersCount,
+                          ),
+                        ));
                   }
                 },
                 child: Container(
@@ -133,5 +137,46 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
       ),
     );
+  }
+
+  //build  color
+
+  Color buldColor(int index) {
+    if (index ==
+            QuizScreenController
+                .flutterQuestions[currentQstnIndex].correctAnswerIndex &&
+        selectedAnswerIndex != null) {
+      // to show right answr if  selected answer is not null
+      return Colors.green;
+    } else if (index == selectedAnswerIndex) {
+      // to show whether the selected asnwer is right or wrong
+      if (selectedAnswerIndex ==
+          QuizScreenController
+              .flutterQuestions[currentQstnIndex].correctAnswerIndex) {
+        return Colors.green;
+      } else {
+        return Colors.red;
+      }
+    } else {
+      // to show the default color as grey
+      return ColorConstants.primaryGrey;
+    }
+  }
+
+  IconData? buildIcons(int index) {
+    if (index ==
+            QuizScreenController
+                .flutterQuestions[currentQstnIndex].correctAnswerIndex &&
+        selectedAnswerIndex != null) {
+      return Icons.done;
+    } else if (index == selectedAnswerIndex) {
+      if (selectedAnswerIndex !=
+          QuizScreenController
+              .flutterQuestions[currentQstnIndex].correctAnswerIndex) {
+        return Icons.close;
+      }
+    } else {
+      return null;
+    }
   }
 }
